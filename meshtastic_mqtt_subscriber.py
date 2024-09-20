@@ -4,7 +4,6 @@ import argparse
 import json
 import logging
 import queue
-import sys
 import threading
 
 # local python file
@@ -31,9 +30,6 @@ def on_connect(client, userdata, _flags, _rc, _properties):
 
 
 def on_disconnect(client, userdata, disconnect_flags):
-    if userdata["exit_code"] != 0:
-        # We are about to exit due to an error. No need to log anything.
-        return
     logging.warning("Disconnected from MQTT server. Will try to reconnect soon.")
 
 
@@ -67,10 +63,9 @@ def process_message(msg: mqtt.MQTTMessage, mqtt_client: mqtt.Client):
     try:
         res = mqtt_client.publish(topic_out, payload_out)
         res.wait_for_publish()
-        logging.debug(f"Message of size {len(payload_out)} B to {topic_out}")
-
+        logging.debug(f"Wrote message of size {len(payload_out)} B to '{topic_out}'")
     except (ValueError, RuntimeError) as e:
-        logging.warning(f"Failed to publish message to topic '{topic}': {e}")
+        logging.warning(f"Failed to publish message to topic '{topic_out}': {e}")
 
 
 def message_processor(message_queue: queue.Queue, mqtt_client: mqtt.Client):
@@ -122,7 +117,7 @@ def main():
         logging.addLevelName(level, logging.getLevelName(level).lower())
 
     q = queue.Queue()
-    userdata = {"queue": q, "args": args, "exit_code": 0}
+    userdata = {"queue": q, "args": args}
     mqttc = mqtt.Client(
         mqtt.CallbackAPIVersion.VERSION2,
         userdata=userdata,
@@ -141,10 +136,13 @@ def main():
     processor = threading.Thread(target=message_processor, args=(q, mqttc))
     processor.start()
 
-    mqttc.loop_forever()
+    try:
+        mqttc.loop_forever()
+    except KeyboardInterrupt:
+        pass
+
     q.put(None)
     processor.join()
-    sys.exit(userdata["exit_code"])
 
 
 if __name__ == "__main__":
