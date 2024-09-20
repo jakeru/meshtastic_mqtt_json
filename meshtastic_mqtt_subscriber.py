@@ -56,16 +56,19 @@ def process_message(msg: mqtt.MQTTMessage, mqtt_client: mqtt.Client):
     except (ValueError, DecodeError) as e:
         logging.warning(
             (
-                f"Failed to decode message of size "
+                "Failed to decode message of size "
                 f"{len(msg.payload)} "
-                "from topic '{msg.topic}': {e}"
+                f"from topic '{msg.topic}': {e}"
             )
         )
         return
-    topic = msg.topic.replace(search, "/json/")
+    topic_out = msg.topic.replace(search, "/json/")
+    payload_out = json.dumps(payload)
     try:
-        res = mqtt_client.publish(topic, json.dumps(payload))
+        res = mqtt_client.publish(topic_out, payload_out)
         res.wait_for_publish()
+        logging.debug(f"Message of size {len(payload_out)} B to {topic_out}")
+
     except (ValueError, RuntimeError) as e:
         logging.warning(f"Failed to publish message to topic '{topic}': {e}")
 
