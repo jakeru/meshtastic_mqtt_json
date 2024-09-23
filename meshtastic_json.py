@@ -9,8 +9,11 @@ from meshtastic import mesh_pb2
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import Message
 
+def message_to_dict(msg: Message):
+    return MessageToDict(msg, preserving_proto_field_name=True)
 
-def decode_payload(payload: bytes, type: portnums_pb2.PortNum.ValueType) -> Message:
+
+def decode_payload(payload: bytes, type: portnums_pb2.PortNum.ValueType) -> dict:
     if type == portnums_pb2.NODEINFO_APP:
         m = mesh_pb2.User()
     elif type == portnums_pb2.TELEMETRY_APP:
@@ -18,7 +21,7 @@ def decode_payload(payload: bytes, type: portnums_pb2.PortNum.ValueType) -> Mess
     else:
         raise ValueError(f"Unsupported payload type: {type}")
     m.ParseFromString(payload)
-    return m
+    return message_to_dict(m)
 
 
 def decode_service_envelope(msg: bytes) -> dict:
@@ -29,8 +32,8 @@ def decode_service_envelope(msg: bytes) -> dict:
     decoded_payload = decode_payload(
         se.packet.decoded.payload, se.packet.decoded.portnum
     )
-    se_dict = MessageToDict(se)
-    se_dict["packet"]["decoded"] = MessageToDict(decoded_payload)
+    se_dict = message_to_dict(se)
+    se_dict["packet"]["decoded"]["payload"] = decoded_payload
     return se_dict
 
 
