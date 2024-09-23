@@ -38,6 +38,7 @@ def decode_service_envelope(msg: bytes) -> dict:
     )
     se_dict = message_to_dict(se)
     se_dict["packet"]["decoded"]["payload"] = decoded_payload
+    se_dict["packet"]["decoded"]["size"] = len(msg)
     return se_dict
 
 
