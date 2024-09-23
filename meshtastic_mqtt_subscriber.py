@@ -29,15 +29,15 @@ def on_connect(client, userdata, _flags, _rc, _properties):
         client.subscribe(topic, 0)
 
 
-def on_disconnect(client, userdata, disconnect_flags):
+def on_disconnect(_client, _userdata, _disconnect_flags, _reason_code, _properties):
     logging.warning("Disconnected from MQTT server. Will try to reconnect soon.")
 
 
-def on_connect_fail(client, userdata):
+def on_connect_fail(_client, _userdata):
     logging.info("Failed to connect to MQTT server. Will retry soon again.")
 
 
-def on_message(client, userdata, msg: mqtt.MQTTMessage):
+def on_message(_client, userdata, msg: mqtt.MQTTMessage):
     userdata["queue"].put(msg)
 
 
