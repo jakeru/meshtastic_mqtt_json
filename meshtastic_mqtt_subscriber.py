@@ -42,7 +42,7 @@ def on_message(_client, userdata, msg: mqtt.MQTTMessage):
 
 
 def process_message(msg: mqtt.MQTTMessage, mqtt_client: mqtt.Client):
-    logging.debug(f"Got message with topic '{msg.topic}' of size {len(msg.payload)} B")
+    logging.info(f"Got message with topic '{msg.topic}' of size {len(msg.payload)} B")
     search = "/e/"
     if not search in msg.topic:
         logging.warning(f"Ignoring topic '{msg.topic}': missing '{search}'")
@@ -63,7 +63,7 @@ def process_message(msg: mqtt.MQTTMessage, mqtt_client: mqtt.Client):
     try:
         res = mqtt_client.publish(topic_out, payload_out)
         res.wait_for_publish()
-        logging.debug(f"Wrote message of size {len(payload_out)} B to '{topic_out}'")
+        logging.info(f"Wrote message of size {len(payload_out)} B to '{topic_out}'")
     except (ValueError, RuntimeError) as e:
         logging.warning(f"Failed to publish message to topic '{topic_out}': {e}")
 
