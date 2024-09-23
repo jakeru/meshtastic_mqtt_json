@@ -14,7 +14,11 @@ def message_to_dict(msg: Message):
 
 
 def decode_payload(payload: bytes, type: portnums_pb2.PortNum.ValueType) -> dict:
-    if type == portnums_pb2.NODEINFO_APP:
+    if type == portnums_pb2.TEXT_MESSAGE_APP:
+        return { "text": payload.decode() }
+    elif type == portnums_pb2.POSITION_APP:
+        m = mesh_pb2.Position()
+    elif type == portnums_pb2.NODEINFO_APP:
         m = mesh_pb2.User()
     elif type == portnums_pb2.TELEMETRY_APP:
         m = telemetry_pb2.Telemetry()
