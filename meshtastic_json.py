@@ -22,6 +22,8 @@ def decode_payload(payload: bytes, type: portnums_pb2.PortNum.ValueType) -> dict
         m = mesh_pb2.User()
     elif type == portnums_pb2.TELEMETRY_APP:
         m = telemetry_pb2.Telemetry()
+    elif type == portnums_pb2.RANGE_TEST_APP:
+        return { "range_test": payload.decode() }
     else:
         raise ValueError(f"Unsupported payload type: {type}")
     m.ParseFromString(payload)
