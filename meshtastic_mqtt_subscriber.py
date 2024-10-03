@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import binascii
 import json
 import logging
 import queue
@@ -57,6 +58,7 @@ def process_message(msg: mqtt.MQTTMessage, mqtt_client: mqtt.Client):
                 f"from topic '{msg.topic}': {e}"
             )
         )
+        logging.info(f"Payload ({len(msg.payload)} B): {binascii.hexlify(msg.payload)}")
         return
     topic_out = msg.topic.replace(search, "/json/")
     payload_out = json.dumps(payload)
